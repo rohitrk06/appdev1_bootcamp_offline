@@ -1,6 +1,9 @@
 {% extends 'base_withNav.html' %}
 
 {% block content %}
+    {% if session['user'] %}
+        <h1>Welcome {{ session['user'] }}</h1>
+    {% endif %}
     <h1>Welcome to the Grocery Store</h1>
     <p>Here you can find all the groceries you need.</p>
 {% endblock content %}

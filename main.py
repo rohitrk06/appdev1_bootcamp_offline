@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from application.config import Config
 from application.database import db
 from application.model import *
@@ -31,9 +31,8 @@ def create_app():
 
 app = create_app()
 
-@app.route('/')
-def index():
-    return render_template('home.html')
+from application.routes import *
+
 
 if __name__ == '__main__':
     app.run(debug=True)
