@@ -1,0 +1,42 @@
+{% extends 'base_withNav.html' %}
+
+{% block title %} Register - Grocery Store  {% endblock title %}
+
+{% block content %}
+<div class="container-fluid col-8 align-center">
+<h1 class="text-center m-3">Register</h1>
+<form method="POST" action="/register">
+    <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <div class="row">
+        <div class="mb-3 col-6">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3 col-6">
+            <label for="password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="comfirm_password" name="confirm_password" required>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+    <div class = 'mb-3'>
+        <label for="email" class="form-label">Address</label>
+        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Address"></textarea>
+    </div>
+    <div class = 'mb-3'>
+        <label for="role" class="form-label">Role</label>
+        <select class="form-select" id="role" name="role" required>
+            <option value="customer">Customer</option>
+            <option value="store_manager">Store Manager</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+</div>
+
+{% endblock content %}
