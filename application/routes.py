@@ -5,6 +5,9 @@ from datetime import datetime
 
 @app.route('/')
 def index():
+    if session['user']:
+        categories = Categories.query.all()
+        return render_template('home.html', categories=categories)
     return render_template('home.html')
 
 @app.route('/login' , methods=['GET', 'POST'])
@@ -184,3 +187,69 @@ def add_product():
             db.session.commit()
             flash('Product added successfully')
             return redirect(url_for('index'))
+        
+@app.route('/edit_product/<int:id>', methods=['GET', 'POST'])
+def edit_product(id):
+    if session['role'] != 'store_manager':
+        flash('You are not authorized to edit product')
+        return redirect(url_for('index'))
+    
+    if request.method == 'GET':
+        product = Products.query.get(id)
+        categories = Categories.query.all()
+        if not product: 
+            flash('Product not found')
+            return redirect(url_for('index'))
+        return render_template('edit_product.html',product = product, categories = categories)
+    
+    if request.method == 'POST':
+        product = Products.query.get(id)
+        name = request.form['product_name']
+        description = request.form['description']
+        selling_price = request.form['selling_price']
+        cost_price = request.form['cost_price']
+        manufacturing_date = request.form['mfg_date']
+        expiry_date = request.form['expiry_date']
+        stock = request.form['quantity']
+        category_id = request.form['category']
+
+        manufacturing_date = datetime.strptime(manufacturing_date, '%Y-%m-%d')
+        expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d')
+
+        if name:
+            product.name = name
+        if description:
+            product.description = description
+        if selling_price:
+            product.selling_price = selling_price
+        if cost_price:
+            product.cost_price = cost_price
+        if manufacturing_date:
+            product.manufacturing_date = manufacturing_date
+        if expiry_date:
+            product.expiry_date = expiry_date
+        if stock:
+            product.stock = stock
+        if category_id:
+            product.category_id = category_id
+
+        db.session.commit()
+        flash('Product updated successfully')
+        return redirect(url_for('index'))
+    
+@app.route('/delete_product/<int:id>')
+def delete_product(id):
+    if session['role'] != 'store_manager':
+        flash('You are not authorized to delete product')
+        return redirect(url_for('index'))
+    
+    product = Products.query.get(id)
+    if not product:
+        flash('Product not found')
+        return redirect(url_for('index'))
+    
+    db.session.delete(product)  
+    db.session.commit()
+    flash('Product deleted successfully')
+    return redirect(url_for('index'))
+

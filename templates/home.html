@@ -2,8 +2,38 @@
 
 {% block content %}
     {% if session['user'] %}
-        <h1>Welcome {{ session['user'] }}</h1>
+        {%for category in categories%}
+            <div class="container-fluid">
+                <h1>{{category.name}}</h1>
+                <p>{{category.description}}</p>
+                <div class="row">
+                {% for product in category.products %}
+                    <div class="card col-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{product.name}}</h5>
+                            <p class="card-text">{{product.description}}</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="card-text">Price: Rs {{product.selling_price}}</p>
+                                </div>
+                                <div class="col-6">
+                                   <p class="card-text">Available Qty: {{product.stock}}</p>
+                                </div>
+                            </div>
+                            {% if session['role'] == 'store_manager' %}
+                                <a href={{url_for('edit_product', id=product.id)}} class="btn btn-primary">Edit</a>
+                                <a href={{url_for('delete_product', id=product.id)}} class="btn btn-danger">Delete</a>
+                            {%endif %}
+                        </div>  
+                    </div>
+                {% endfor %}
+                </div>  
+            </div>
+        {%endfor%}
+    {% else %}
+        <h1>Welcome to the Grocery Store</h1>
+        <p>Here you can find all the groceries you need.</p>
+        <p>Click on the link below to start shopping.</p>
+        <a href={{url_for('login')}}>Login</a>
     {% endif %}
-    <h1>Welcome to the Grocery Store</h1>
-    <p>Here you can find all the groceries you need.</p>
 {% endblock content %}
