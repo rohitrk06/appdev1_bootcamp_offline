@@ -1,0 +1,34 @@
+{% extends 'base_withNav.html' %}
+
+{% block title %} Requests - Grocery Store  {% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        {% for request in requests %}
+            <div class = "card col-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{request.request_type}}</h5>
+                    <p>Status : {{request.request_status}}</p>
+                    {% if request.request_type == 'update_category' %}
+                        <p>Old Category Name: {{request.category.name}}</p>
+                        <p>New Category Name: {{request.new_category_name}}</p>
+                        <br>
+                        <p>Old Category Description: {{request.category.description}}</p>
+                        <p>New Category Description: {{request.new_category_description}}</p>
+                    {% elif request.request_type == 'add_category' %}
+                        <p>New Category Name: {{request.new_category_name}}</p>
+                        <p>New Category Description:   {{request.new_category_description }}</p>
+                    {% elif request.request_type == 'delete_category' %}
+                        <p>Categroy Name : {{request.category.name}}</p>
+                    {% endif %}
+                    {% if 'role' in session and session['role']=='admin'%}
+                        <a href="{{url_for('approve_request', id=request.id)}}" class="btn btn-primary">Approve</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

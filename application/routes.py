@@ -5,7 +5,7 @@ from datetime import datetime
 
 @app.route('/')
 def index():
-    if session['user']:
+    if 'user' in session:
         categories = Categories.query.all()
         return render_template('home.html', categories=categories)
     return render_template('home.html')
@@ -253,3 +253,104 @@ def delete_product(id):
     flash('Product deleted successfully')
     return redirect(url_for('index'))
 
+
+@app.route('/add_cart/<int:id>', methods=['POST'])
+def add_card(id):
+    qty = request.form.get('quantity',None)
+
+    try:
+        qty = int(qty)
+    except:
+        flash('Invalid quantity')
+        return redirect(url_for('index'))
+    
+    if 'user' not in session:
+        flash('Please login to add product to cart')
+        return redirect(url_for('login'))
+
+    if 'role' in session and session['role'] != 'customer':
+        flash('You are not authorized to add product to cart')
+        return redirect(url_for('index'))
+    
+    product_details = Products.query.get(id)
+    if not product_details:
+        flash('Product not found')
+        return redirect(url_for('index'))
+    
+    if not qty:
+        flash('Please enter quantity')
+        return redirect(url_for('index'))
+
+    if product_details.stock < qty:
+        flash('Stock not available')
+        return redirect(url_for('index'))
+    
+    cart = Cart.query.filter_by(product_id=id, user=session['user']).first()
+    if cart:
+        cart.quantity += qty
+    else:
+        cart = Cart(product_id=id, user=session['user'], quantity=qty)
+        db.session.add(cart)
+
+    product_details.stock  = product_details.stock - qty
+    db.session.commit()
+    flash('Product added to cart')
+    return redirect(url_for('index'))   
+
+
+@app.route('/view_requests', methods=['GET', 'POST'])
+def viewRequests():
+    if request.method == 'GET':
+        if 'role' in session and session['role'] == 'admin':
+            requests = Requests.query.filter_by(request_status='pending').all()
+            return render_template('requests.html',requests = requests)
+       
+        if 'role' in session and session['role'] == 'store_manager':
+            requests = Requests.query.filter_by(requester=session['user']).all()
+            return render_template('requests.html',requests = requests)
+
+@app.route('/approve_request/<int:id>')
+def approve_request(id):
+    request = Requests.query.get(id)
+
+    if request.request_type == 'add_category':
+        category = Categories.query.filter_by(name=request.new_category_name).first()
+        if category:
+            request.request_status = 'rejected'
+            db.session.commit()
+            return redirect(url_for('viewRequests'))
+        category = Categories(name=request.new_category_name, description=request.new_category_description)
+        try:
+            db.session.add(category)
+            request.request_status = 'approved'
+            db.session.commit()
+            flash('Category added successfully')
+            return redirect(url_for('viewRequests'))
+        except:
+            flash('Error approving request')
+            return redirect(url_for('viewRequests'))
+
+    if request.request_type == 'update_category':
+        category = Categories.query.get(request.category_id)
+        if not category:
+            request.request_status = 'rejected'
+            db.session.commit()
+            return redirect(url_for('viewRequests'))
+        category.name = request.new_category_name
+        category.description = request.new_category_description
+        request.request_status = 'approved'
+        db.session.commit()
+        flash('Category updated successfully')
+        return redirect(url_for('viewRequests'))
+
+    if request.request_type == 'delete_category':
+        category = Categories.query.get(request.category_id)
+        if not category:
+            request.request_status = 'rejected'
+            db.session.commit()
+            return redirect(url_for('viewRequests'))
+        db.session.delete(category)
+        request.request_status = 'approved'
+        db.session.commit()
+        flash('Category deleted successfully')
+        return redirect(url_for('viewRequests'))   
