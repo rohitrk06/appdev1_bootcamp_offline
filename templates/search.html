@@ -1,0 +1,27 @@
+{% extends 'base_withNav.html' %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Search Results</h1>
+
+    <p>
+        Products found: {{ products|length }}
+    </p>
+    <p> List of products: </p>
+    {%for product in products %}
+    <p>
+        {{product.name}} - {{product.price}}
+    </p>
+    {% endfor %}
+    <p> Categories found: {{ categories|length }} </p>
+    <p> List of categories: </p>
+    {%for category in categories %}
+    <p>
+        {{category.name}}
+    </p>
+    {% endfor %}
+    
+</div>
+{% endblock %}

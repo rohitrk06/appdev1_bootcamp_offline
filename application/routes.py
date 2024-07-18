@@ -354,3 +354,16 @@ def approve_request(id):
         db.session.commit()
         flash('Category deleted successfully')
         return redirect(url_for('viewRequests'))   
+
+
+@app.route('/search',methods=['GET','POST'])
+def search():
+    if request.method == 'POST':
+        search = request.form.get('search',None)
+        if not search:
+            flash('Please enter search keyword')
+            return redirect(url_for('index'))
+        
+        products = Products.query.filter(Products.name.like(f'%{search}%')).all()
+        categories = Categories.query.filter(Categories.name.like(f'%{search}%')).all()
+        return render_template('search.html',products=products,categories=categories)
